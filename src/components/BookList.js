@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getBooks, deleteBook } from '../services/api';
+import { getBooks } from '../services/api';
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
@@ -24,29 +24,23 @@ const BookList = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    try {
-        await deleteBook(id);
-        fetchBooks();
-      } catch (err) {
-          setError("Kitap silinirken bir hata oluştu.");
-        console.error("Error deleting book:", err);
-    }
-  };
-
   if (loading) {
-    return <div className="d-flex justify-content-center align-items-center vh-100">
-            <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>;
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
-    if (error) {
-        return  <div className="d-flex justify-content-center align-items-center vh-100">
-            <p className="text-danger fs-5">{error}</p>
-            </div>
-    }
+  if (error) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <p className="text-danger fs-5">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -57,12 +51,28 @@ const BookList = () => {
             key={book.id}
             className="list-group-item d-flex justify-content-between align-items-center"
           >
-            <div>
-              <h5 className="mb-1">{book.title}</h5>
-              <p className="mb-0 text-muted">{book.author}</p>
+            <div className="d-flex align-items-center">
+              {book.photoUrl && (
+                <img
+                  src={book.photoUrl}
+                  alt="Kitap Fotoğrafı"
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    objectFit: 'cover',
+                    marginRight: '15px',
+                  }}
+                />
+              )}
+              <div>
+                <h5 className="mb-1">{book.title}</h5>
+                <p className="mb-0 text-muted">Yazar: {book.author}</p>
+                <p className="mb-0 text-muted">Yayın Tarihi: {book.publishedDate}</p>
+                <p className="mb-0 text-muted">ISBN: {book.isbn}</p>
+              </div>
             </div>
             <button
-              onClick={() => handleDelete(book.id)}
+              onClick={() => console.log("Silme işlemi:", book.id)}
               className="btn btn-danger btn-sm"
             >
               Sil

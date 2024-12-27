@@ -35,9 +35,15 @@ export const getBooks = async () => {
 
 // Yeni kitap ekle
 export const createBook = async (book) => {
-    const response = await axiosInstance.post('', book);
-    return response.data;
-};
+    try {
+      const response = await axios.post('http://localhost:8080/api/books', book);
+      return response.data;
+    } catch (error) {
+      console.error('Kitap eklenirken bir hata oluştu:', error);
+      throw error;
+    }
+  };
+  
 
 // Kitap güncelle
 export const updateBook = async (id, book) => {

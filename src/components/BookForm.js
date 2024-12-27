@@ -1,75 +1,117 @@
 import React, { useState } from 'react';
-import { createBook } from '../services/api';
+import { createBook } from '../services/api'; // API çağrısı fonksiyonu
 
 const BookForm = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
-    const [loading, setLoading] = useState(false);
+  const [publishedDate, setPublishedDate] = useState('');
+  const [isbn, setIsbn] = useState('');
+  const [photoUrl, setPhotoUrl] = useState(''); // Fotoğraf URL'si
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoUrl(reader.result); // Base64 veriyi set et
+    };
+    if (file) {
+      reader.readAsDataURL(file); // Base64'e dönüştür
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
     setLoading(true);
+    setError('');
+    setSuccess('');
 
-      if (!title.trim() || !author.trim()) {
-          setError("Lütfen hem kitap adı hem de yazar alanını doldurun.");
-          setLoading(false);
-          return;
-      }
+    if (!title.trim() || !author.trim() || !publishedDate.trim() || !isbn.trim() || !photoUrl.trim()) {
+      setError('Lütfen tüm alanları doldurun.');
+      setLoading(false);
+      return;
+    }
+
+    const newBook = { title, author, publishedDate, isbn, photoUrl };
+
     try {
-        const newBook = { title, author };
-        await createBook(newBook);
-        setTitle('');
-        setAuthor('');
-        setSuccess("Kitap başarıyla eklendi!");
+      await createBook(newBook);
+      setSuccess('Kitap başarıyla eklendi!');
+      setTitle('');
+      setAuthor('');
+      setPublishedDate('');
+      setIsbn('');
+      setPhotoUrl('');
     } catch (err) {
-         setError("Kitap eklenirken bir hata oluştu.");
-        console.error("Error adding book:", err);
+      console.error(err);
+      setError('Kitap eklenirken bir hata oluştu.');
     } finally {
-         setLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container mt-4 bg-white shadow-md rounded p-4">
-      <h2 className="text-center mb-4">Yeni Kitap Ekle</h2>
-        <form onSubmit={handleSubmit}>
-             <div className="mb-3">
-             <label htmlFor="title" className="form-label">Kitap Adı</label>
-              <input
-               type="text"
-                id="title"
-                placeholder="Kitap Adı"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-               className="form-control"
-              />
-          </div>
-            <div className="mb-3">
-              <label htmlFor="author" className="form-label">Yazar</label>
-                <input
-                type="text"
-                id="author"
-                placeholder="Yazar"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                className="form-control"
-               />
-           </div>
-           <div className="d-flex justify-content-center">
-                 <button type="submit"
-                        disabled={loading}
-                        className={`btn btn-primary ${loading ? 'disabled' : ''}`}>
-                            {loading ? 'Kaydediliyor...' : 'Ekle'}
-                 </button>
-           </div>
-             {error && <div className="text-danger mt-2 text-center">{error}</div>}
-           {success && <div className="text-success mt-2 text-center">{success}</div>}
-        </form>
+    <div className="container mt-4">
+      <h2>Yeni Kitap Ekle</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label>Kitap Adı</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="form-control"
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Yazar</label>
+          <input
+            type="text"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            className="form-control"
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Yayın Tarihi</label>
+          <input
+            type="date"
+            value={publishedDate}
+            onChange={(e) => setPublishedDate(e.target.value)}
+            className="form-control"
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>ISBN</label>
+          <input
+            type="text"
+            value={isbn}
+            onChange={(e) => setIsbn(e.target.value)}
+            className="form-control"
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Fotoğraf</label>
+          <input
+            type="file"
+            onChange={handlePhotoChange}
+            className="form-control"
+            required
+          />
+        </div>
+        {photoUrl && <img src={photoUrl} alt="Seçilen Fotoğraf" className="img-thumbnail" style={{ width: '150px', height: '150px', objectFit: 'cover' }} />}
+        <button type="submit" className="btn btn-primary mt-3" disabled={loading}>
+          {loading ? 'Kaydediliyor...' : 'Ekle'}
+        </button>
+        {error && <p className="text-danger mt-3">{error}</p>}
+        {success && <p className="text-success mt-3">{success}</p>}
+      </form>
     </div>
   );
 };
